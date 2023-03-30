@@ -1,0 +1,15 @@
+{
+  "name": "aptos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chingari-aptos" : "git+https://npm_chingari:ATBBy8shgJxEHeDCsQPLxMUbCeg929956118@bitbucket.org/sumitghosh/web3-utilities.git#chingari-aptos"
+  }
+}
