@@ -34,40 +34,33 @@ async function run() {
     const { rawTxnBase64 } = await aptosChingariTransactions.registerTokenToAddress({
         chingariClient,
         accountAddress: userAccount.publicKey,
-        feePayer: payerAccount.publicKey
+        feePayer: payerAccount.publicKey,
+        coinType: gariCoinType
     });
-    console.log(
-        rawTxnBase64,
-        [userAccount.publicKey],
-        payerAccount.privateKey.substring(2)
-    );
     const payerAuth = await aptosChingariTransactions.getTransactionAuthenticationFromSigners(
         rawTxnBase64,
         [userAccount.publicKey],
         payerAccount.privateKey.substring(2)
     );
-    console.log({ payerAuth });
-    // const userAuth = await new AptosChingariTransactions().getTransactionAuthenticationFromSigners(
-    //     rawTxnBase64,
-    //     ['0x0cf17dd048dfc2aea2749a4393cd4a42d722d72a312fce1a6dd6924fec4e9e01'],
-    //     'b67c14f170d4703eb3db8c09036741b1c88b19b856357cf3036b023afdbe5981'
-    // );
-    // console.log({
-    //     rawTxnBase64,
-    //     payerAuth,
-    //     userAccount: '0x0cf17dd048dfc2aea2749a4393cd4a42d722d72a312fce1a6dd6924fec4e9e01',
-    //     userAuth
-    // });
-    // const hash = await new AptosChingariTransactions().createMultiAgentTXAndSubmit(
-    //     chingariClient,
-    //     rawTxnBase64,
-    //     payerAuth,
-    //     '0x0cf17dd048dfc2aea2749a4393cd4a42d722d72a312fce1a6dd6924fec4e9e01',
-    //     userAuth
-    // );
-    // const hash = await chingariClient.signAndSendEncodedTransaction(rawTxnBase64, [receiverAccount.privateKey.substring(2)]);
-    // const hash = await chingariClient.signAndSendRawTransaction({ rawTransaction: rawTxnBase64, senderPrivateKey: senderAccount.privateKey.substring(2) });
-    // console.log(hash);
+    const userAuth = await aptosChingariTransactions.getTransactionAuthenticationFromSigners(
+        rawTxnBase64,
+        [userAccount.publicKey],
+        userAccount.privateKey.substring(2)
+    );
+    console.log({
+        rawTxnBase64,
+        payerAuth,
+        'userAccount.publicKey': userAccount.publicKey,
+        userAuth
+    });
+    const hash = await aptosChingariTransactions.createMultiAgentTXAndSubmit(
+        chingariClient,
+        rawTxnBase64,
+        payerAuth,
+        userAccount.publicKey,
+        userAuth
+    );
+    console.log(hash);
 }
 
 run();
