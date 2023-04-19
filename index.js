@@ -1,8 +1,9 @@
-const { AptosChingari, AptosChingariTransactions } = require('chingari-aptos');
+require('dotenv').config();
+const { AptosChingari, AptosChingariTransactions } = require('aptos');
 
 const payerAccount = {
-    privateKey: '0x2ce722ef94fa9ff20b3959123eb3256c20c501ca16df7d5a2f45187e8005abd7',
-    publicKey: '0x9c5947d235fca8af0ed9c90dca50196c112dac407eb19d87d9287db93d7e2d51'
+    privateKey: process.env.PAYER_ACCOUNT_PRIVATE_KEY,
+    publicKey: process.env.PAYER_ACCOUNT_PUBLIC_KEY
 }
 const user1Account = {
     privateKey: '0xb67c14f170d4703eb3db8c09036741b1c88b19b856357cf3036b023afdbe5981',
@@ -13,15 +14,14 @@ const user2Account = {
     publicKey: '0x37f2b3a1e2a47cf09fe9720b3a74a44e678c64dce55f21dd492ccb03be7558e1'
 }
 
-const dogeCoinType = '0x334dbaf0e815bd106a61c7031a0043770ed3e0c46ea5b0cf9cb7855a57adaeba::dogecoinV2::DogeCoin';
-const gariCoinType = '0x334dbaf0e815bd106a61c7031a0043770ed3e0c46ea5b0cf9cb7855a57adaeba::gari_coin::GariCoin';
-const goXoYo1CoinType = '0xe60c54467e4c094cee951fde4a018ce1504f3b0f09ed86e6c8d9811771c6b1f0::coin::T';
+// const dogeCoinType = '0x334dbaf0e815bd106a61c7031a0043770ed3e0c46ea5b0cf9cb7855a57adaeba::dogecoinV2::DogeCoin';
+// const gariCoinType = '0x334dbaf0e815bd106a61c7031a0043770ed3e0c46ea5b0cf9cb7855a57adaeba::gari_coin::GariCoin';
 const aptosCoinType = '0x1::aptos_coin::AptosCoin';
+const goXoYo1CoinType = '0xe60c54467e4c094cee951fde4a018ce1504f3b0f09ed86e6c8d9811771c6b1f0::coin::T';
 
-const coinsIn1Aptos = 100000000;
-const coinsIn1Gari = 1000000;
+const amountIn1Coin = 100000000;
 
-const chingariClient = new AptosChingari(
+const chingariAptosClient = new AptosChingari(
     'https://rpc.ankr.com/premium-http/aptos_testnet/fb86dfe08c91679888512d9e458a82021921afaa10c9d66c62ed3d7cec207abd/v1',
     payerAccount.publicKey,
     payerAccount.publicKey
@@ -95,6 +95,43 @@ async function getTransactionDetails() {
     console.log(transactionDetails);
 }
 
+async function tip() {
+    const { rawTxnBase64 } = await aptosChingariTransactions.rawTransactionCoinTransferMultiple({
+        chingariClient: chingariAptosClient,
+        from: user1Account.publicKey,
+        to: [payerAccount.publicKey, user2Account.publicKey],
+        count: 2,
+        amount: [2 * amountIn1Coin, 1 * amountIn1Coin],
+        feePayer: payerAccount.publicKey,
+        coinType: goXoYo1CoinType,
+    });
+    const payerAuth = await aptosChingariTransactions.getTransactionAuthenticationFromSigners(
+        rawTxnBase64,
+        [user1Account.publicKey],
+        payerAccount.privateKey.substring(2)
+    );
+    const userAuth = await aptosChingariTransactions.getTransactionAuthenticationFromSigners(
+        rawTxnBase64,
+        [user1Account.publicKey],
+        user1Account.privateKey.substring(2)
+    );
+    const hash = await aptosChingariTransactions.createMultiAgentTXAndSubmit(
+        chingariAptosClient,
+        rawTxnBase64,
+        payerAuth,
+        user1Account.publicKey,
+        userAuth
+    );
+    console.log(JSON.stringify(hash));
+}
+
 // registerWithGari();
 // transferCoins();
 // getTransactionDetails();
+tip();
+
+// chingariAptosClient.getTokenBalance(payerAccount.publicKey, goXoYo1CoinType).then((value) => {
+//     const balance = value;
+//     const balanceInAptosCoin = balance / amountIn1Coin;
+//     console.log(135, balance, balanceInAptosCoin);
+// });
