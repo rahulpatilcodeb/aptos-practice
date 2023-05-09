@@ -14,7 +14,6 @@ RUN npm i --quiet -f
 # RUN rm /app/node_modules/kool/lib/index.d.ts
 
 ADD . /app
-EXPOSE 5000
+# EXPOSE PORT
 # RUN npm run build
-# CMD ["npm","run","start:prod"]
 CMD node index
